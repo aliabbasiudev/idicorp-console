@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# /api/* is handled by netlify/edge-functions/api-proxy.js
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
