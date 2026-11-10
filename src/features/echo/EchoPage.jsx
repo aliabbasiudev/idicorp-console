@@ -9,6 +9,11 @@ import { cardClass, inputClass } from '../../components/ui/styles'
 
 const time = () => new Date().toLocaleTimeString('en-US', { hour12: false })
 
+// The service only accepts /ws/echo when the handshake carries an Authorization header,
+// which browsers cannot set on a WebSocket. Say so instead of a generic failure.
+const AUTH_HINT =
+  'The service may be rejecting the connection: /ws/echo requires an Authorization header, which browsers cannot send.'
+
 export default function EchoPage() {
   const [message, setMessage] = useState('')
   const [log, setLog] = useState([])
@@ -45,7 +50,7 @@ export default function EchoPage() {
       />
       <ConnectionPanel
         status={status}
-        error={error}
+        error={error ? `${error} ${AUTH_HINT}` : null}
         onConnect={connect}
         onDisconnect={disconnect}
       />
