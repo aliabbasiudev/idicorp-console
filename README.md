@@ -2,7 +2,7 @@
 
 A responsive React front-end for the IDICorp service: sign in with a CAPTCHA, manage sample
 tasks, and try the calculator, text echo and streaming echo. Black-and-yellow theme, keyboard
-accessible, standalone (no backend integration).
+accessible, standalone front-end for the IDICorp API.
 
 ## Requirements
 
@@ -17,8 +17,8 @@ cp .env.example .env      # Windows: copy .env.example .env
 npm run dev               # http://localhost:5173
 ```
 
-Sign in with the credentials provided for your environment (the local mock defaults to
-`admin` / `admin`).
+Sign in with the credentials provided for your environment (the task brief lists
+`admin` / `admin` for the mock).
 
 ## Commands
 
@@ -52,7 +52,8 @@ No secrets are stored in the repository or the app.
 - **Calculator** over `/ws/calculator`: add, subtract, multiply, divide; connection state, input
   validation that mirrors the service rules, result and history, and the service's error shown.
 - **Text echo** over `/ws/echo`: connection state with connect/disconnect, many messages per
-  connection, message log.
+  connection, message log. The service currently rejects this connection from a browser (see
+  Assumptions and notes).
 - **Stream echo**: `POST /api/echo/stream` with text; the response is shown chunk by chunk with
   chunk/byte counts and a cancel button.
 - **Accessibility**: skip link, labelled controls, visible focus, keyboard-operable dialogs
@@ -86,8 +87,8 @@ React Hook Form + Zod (forms), Tailwind CSS 4, Radix UI (dialogs), Sonner (toast
 ## Deployment (Netlify)
 
 1. Push this repository to GitHub and import it in Netlify.
-2. Leave **Base directory** empty. `netlify.toml` sets the build command (`npm run build`) and
-   publish directory (`dist`).
+2. Leave **Base directory** empty. `netlify.toml` sets the build command (`npm run build`), the
+   publish directory (`dist`) and Node 22 (`NODE_VERSION`).
 3. Deploy. No environment variables are required.
 
 `netlify.toml` serves `index.html` for every route (client-side routing) and
@@ -102,8 +103,15 @@ React Hook Form + Zod (forms), Tailwind CSS 4, Radix UI (dialogs), Sonner (toast
   Static assets are still served by the front-end host; only API calls are proxied. To call the
   service directly instead, set `VITE_API_BASE_URL=https://ts.idicorp.ir` (the service must then
   allow your origin with credentials).
-- **WebSockets connect directly** to the service. Both flows work without cookies: the calculator
-  sends the access token as its first message (within one second), the text echo needs none.
+- **WebSockets connect directly** to the service. The calculator works without cookies: it sends
+  the access token as its first message (within one second).
+- **Text echo is blocked by the service.** `wss://ts.idicorp.ir/ws/echo` rejects the WebSocket
+  handshake with HTTP 403 unless an `Authorization: Bearer <token>` header is present (verified
+  with `wscat`). Browsers cannot set that header on a WebSocket, and the token as a query
+  parameter, a subprotocol or the first message is also rejected, so the page shows the
+  connection failing with an explanation. The client follows the documented protocol (connect,
+  `{"type":"ready"}`, then text messages) and will work as soon as the service accepts the token
+  another way. Reported in issue #3.
 - **Token storage.** The access token is held in memory only, so a page refresh signs the user out.
   This is deliberate: nothing sensitive is written to web storage.
 - **Task lifetime.** Tasks expire one hour after creation or last update and every login starts a
