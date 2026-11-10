@@ -111,7 +111,7 @@ React Hook Form + Zod (forms), Tailwind CSS 4, Radix UI (dialogs), Sonner (toast
   parameter, a subprotocol or the first message is also rejected, so the page shows the
   connection failing with an explanation. The client follows the documented protocol (connect,
   `{"type":"ready"}`, then text messages) and will work as soon as the service accepts the token
-  another way. Reported in issue #3.
+  another way. Reported in [issue #11](https://github.com/mtrshirazi21/idicorp-frontend-challenge/issues/11).
 - **Token storage.** The access token is held in memory only, so a page refresh signs the user out.
   This is deliberate: nothing sensitive is written to web storage.
 - **Task lifetime.** Tasks expire one hour after creation or last update and every login starts a
